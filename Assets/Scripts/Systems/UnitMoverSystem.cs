@@ -48,7 +48,23 @@ public partial struct UnitMoverJob : IJobEntity
     
     public void Execute(ref LocalTransform localTransform, in UnitMover unitMover, ref PhysicsVelocity physicsVelocity)
     {
+        if (math.all(unitMover.targetPosition == float3.zero))
+        {
+            physicsVelocity.Linear = float3.zero;
+            physicsVelocity.Angular = float3.zero;
+            return;
+        }
+        
         float3 moveDirection = unitMover.targetPosition - localTransform.Position;
+        
+        float distanceSq = math.lengthsq(moveDirection);
+        if (distanceSq < 0.01f)
+        {
+            physicsVelocity.Linear = float3.zero;
+            physicsVelocity.Angular = float3.zero;
+            return;
+        }
+        
         moveDirection = math.normalizesafe(moveDirection);
 
         localTransform.Rotation = 
